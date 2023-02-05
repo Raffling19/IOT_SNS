@@ -6,9 +6,11 @@ import org.apache.kafka.streams.scala.StreamsBuilder
 import org.apache.kafka.streams.scala.kstream._
 import org.apache.kafka.streams.{KafkaStreams, StreamsConfig}
 import org.apache.avro.data.Json
+import java.time.Duration
+import com.eclipsesource
+import com.fasterxml.jackson.annotation.JsonValue
 import play.api.libs
 import com.eclipsesource
-import java.time.Duration
 
 object Main extends App {
 
@@ -50,8 +52,8 @@ object Main extends App {
     val cleanJsonString = v.replace("\u0000", "").replace("\u0002","")
     val json = libs.json.Json.parse(cleanJsonString)
 
-    var inside_light_on = false
-    var shells_down_or_dark_outside = false
+    var inside_light_on = 0
+    var shells_down_or_dark_outside = 0
 
     val data = SensorData(
       (json \ "digPir").as[Int],
@@ -66,11 +68,11 @@ object Main extends App {
     ) 
 
     if (data.lightInside >= 400) {
-      inside_light_on = true
+      inside_light_on = 1
     }
 
     if (data.cct == 0) {
-      shells_down_or_dark_outside = true
+      shells_down_or_dark_outside = 1
     }
     val out = s"""{"inside_light_on": $inside_light_on, "shells_down_or_dark_outside": $shells_down_or_dark_outside}"""
     (k,out)
@@ -78,7 +80,7 @@ object Main extends App {
 
   def dataMaster_outside(k:String,v:String):(String,String) ={
 
-    var light_ouside_enough = false
+    var light_ouside_enough = 0
     val cleanJsonString = v.replace("\u0000", "").replace("\u0002","")
     val json = libs.json.Json.parse(cleanJsonString)
 
@@ -89,7 +91,7 @@ object Main extends App {
     ) 
 
     if (data.lightOutside >= 250) {
-      light_ouside_enough = true
+      light_ouside_enough = 1
     }
 
     val out = s"""{"light_ouside_enough":$light_ouside_enough }"""
